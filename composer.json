@@ -1,0 +1,26 @@
+{
+    "name": "dashifen/acf-sharing-settings",
+    "description": "An ACF field group for a settings page relating to how a site appears on Twitter and Facebook.",
+    "type": "wordpress-mu-plugin",
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "David Dashifen Kees",
+            "email": "dashifen@dashifen.com",
+            "role": "developer"
+        }
+    ],
+    "autoload": {
+        "prs-4": {
+            "Dashifen\\ACFSharingSettings\\": "src"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "require": {
+        "dashifen/wp-handler": "^9.4"
+    }
+}
