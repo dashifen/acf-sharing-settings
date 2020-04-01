@@ -38,14 +38,7 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     public function initialize (): void
     {
-        if (!$this->isInitialized() && function_exists('acf_add_options_page')) {
-            
-            // if we haven't already initialized this object and if ACF is
-            // present and enabled, we'll do our work here.  first, we'll add
-            // the options page and the fields that appear on it.  note that
-            // the fields are added at priority 15 to be 100% sure the page
-            // exists first.
-            
+        if (!$this->isInitialized()) {
             $this->addAction('acf/init', 'addSharingSettingsPage');
             $this->addAction('acf/init', 'addSharingSettingsFields', 15);
             $this->addAction('acf/load_value/key=field_5b217fef91019', 'setDefaultSharingTitle');
@@ -64,19 +57,26 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function addSharingSettingsPage (): void
     {
-        $args = $this->sharingIsSubPage
-            ? [
-                'page_title'  => $this->sharingMenuName,
-                'parent_slug' => 'options-general.php',
-                'capability'  => 'manage_options',
-            ] : [
-                'page_title' => $this->sharingMenuName,
-                'icon_url'   => $this->sharingMenuIcon,
-                'position'   => $this->sharingMenuPosition,
-                'capability' => 'manage_options',
-            ];
-        
-        acf_add_options_page($args);
+        if ($this->withACF()) {
+            $args = $this->sharingIsSubPage
+                ? [
+                    'page_title'  => $this->sharingMenuName,
+                    'parent_slug' => 'options-general.php',
+                    'capability'  => 'manage_options',
+                ] : [
+                    'page_title' => $this->sharingMenuName,
+                    'icon_url'   => $this->sharingMenuIcon,
+                    'position'   => $this->sharingMenuPosition,
+                    'capability' => 'manage_options',
+                ];
+            
+            acf_add_options_page($args);
+        }
+    }
+    
+    private function withACF (): bool
+    {
+        return function_exists('acf_add_options_page');
     }
     
     /**
@@ -89,204 +89,206 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function addSharingSettingsFields ()
     {
-        acf_add_local_field_group([
-            'key'                   => 'group_5b217fc6e5c3a',
-            'title'                 => 'Social Networking and Analytics',
-            'fields'                => [
-                [
-                    'key'               => 'field_5b21814b34e06',
-                    'label'             => 'General Fields',
-                    'name'              => 'general',
-                    'type'              => 'group',
-                    'instructions'      => 'These fields are used on both Twitter and Facebook.',
-                    'required'          => 1,
-                    'conditional_logic' => 0,
-                    'wrapper'           => [
-                        'width' => '',
-                        'class' => '',
-                        'id'    => '',
-                    ],
-                    'layout'            => 'block',
-                    'sub_fields'        => [
-                        [
-                            'key'               => 'field_5b217fef91019',
-                            'label'             => 'Title',
-                            'name'              => 'title',
-                            'type'              => 'text',
-                            'instructions'      => 'Enter the title of this site.',
-                            'required'          => 0,
-                            'conditional_logic' => 0,
-                            'wrapper'           => [
-                                'width' => '',
-                                'class' => '',
-                                'id'    => '',
-                            ],
-                            'default_value'     => '',
-                            'placeholder'       => '',
-                            'prepend'           => '',
-                            'append'            => '',
-                            'maxlength'         => '',
-                        ],
-                        [
-                            'key'               => 'field_5b21819634e07',
-                            'label'             => 'Description',
-                            'name'              => 'description',
-                            'type'              => 'textarea',
-                            'instructions'      => 'Enter one or two sentences about this site.',
-                            'required'          => 0,
-                            'conditional_logic' => 0,
-                            'wrapper'           => [
-                                'width' => '',
-                                'class' => '',
-                                'id'    => '',
-                            ],
-                            'default_value'     => '',
-                            'placeholder'       => '',
-                            'maxlength'         => '',
-                            'rows'              => 3,
-                            'new_lines'         => '',
-                        ],
-                    ],
-                ],
-                [
-                    'key'               => 'field_5b217fcf91018',
-                    'label'             => 'Facebook Sharing',
-                    'name'              => 'facebook',
-                    'type'              => 'group',
-                    'instructions'      => 'These fields determine how things look when your site is shared on Facebook.',
-                    'required'          => 1,
-                    'conditional_logic' => 0,
-                    'wrapper'           => [
-                        'width' => '',
-                        'class' => '',
-                        'id'    => '',
-                    ],
-                    'layout'            => 'block',
-                    'sub_fields'        => [
-                        [
-                            'key'               => 'field_5b2180419101b',
-                            'label'             => 'Image',
-                            'name'              => 'image',
-                            'type'              => 'image',
-                            'instructions'      => 'Images must be exactly 1200 pixels wide and 630 pixels high.',
-                            'required'          => 0,
-                            'conditional_logic' => 0,
-                            'wrapper'           => [
-                                'width' => '',
-                                'class' => '',
-                                'id'    => '',
-                            ],
-                            'return_format'     => 'id',
-                            'preview_size'      => 'thumbnail',
-                            'library'           => 'all',
-                            'min_width'         => 1200,
-                            'min_height'        => 630,
-                            'min_size'          => '',
-                            'max_width'         => 1200,
-                            'max_height'        => 630,
-                            'max_size'          => '',
-                            'mime_types'        => '',
-                        ],
-                    ],
-                ],
-                [
-                    'key'               => 'field_5b2180d034e03',
-                    'label'             => 'Twitter Sharing',
-                    'name'              => 'twitter',
-                    'type'              => 'group',
-                    'instructions'      => 'These fields determine how things look when your site is shared on Twitter.',
-                    'required'          => 1,
-                    'conditional_logic' => 0,
-                    'wrapper'           => [
-                        'width' => '',
-                        'class' => '',
-                        'id'    => '',
-                    ],
-                    'layout'            => 'block',
-                    'sub_fields'        => [
-                        [
-                            'key'               => 'field_5b2180f434e04',
-                            'label'             => 'Twitter Handle',
-                            'name'              => 'handle',
-                            'type'              => 'text',
-                            'instructions'      => 'Enter the handle for the Twitter account associated with this site.',
-                            'required'          => 0,
-                            'conditional_logic' => 0,
-                            'wrapper'           => [
-                                'width' => '',
-                                'class' => '',
-                                'id'    => '',
-                            ],
-                            'default_value'     => '',
-                            'placeholder'       => '',
-                            'prepend'           => '@',
-                            'append'            => '',
-                            'maxlength'         => '',
-                        ],
-                        [
-                            'key'               => 'field_5b2181d134e08',
-                            'label'             => 'Image',
-                            'name'              => 'image',
-                            'type'              => 'image',
-                            'instructions'      => 'Images must be exactly 1200 pixels wide and 675 pixels high.',
-                            'required'          => 0,
-                            'conditional_logic' => 0,
-                            'wrapper'           => [
-                                'width' => '',
-                                'class' => '',
-                                'id'    => '',
-                            ],
-                            'return_format'     => 'id',
-                            'preview_size'      => 'thumbnail',
-                            'library'           => 'all',
-                            'min_width'         => 1200,
-                            'min_height'        => 675,
-                            'min_size'          => '',
-                            'max_width'         => 1200,
-                            'max_height'        => 675,
-                            'max_size'          => '',
-                            'mime_types'        => '',
-                        ],
-                    ],
-                ],
-                [
-                    'key'               => 'field_5b2180129101a',
-                    'label'             => 'Google Analytics Code',
-                    'name'              => 'analytics_id',
-                    'type'              => 'text',
-                    'instructions'      => 'Enter the "UA" code provided by Google for this site.',
-                    'required'          => 0,
-                    'conditional_logic' => 0,
-                    'wrapper'           => [
-                        'width' => '',
-                        'class' => '',
-                        'id'    => '',
-                    ],
-                    'default_value'     => '',
-                    'placeholder'       => '',
-                    'prepend'           => 'UA-',
-                    'append'            => '',
-                    'maxlength'         => '',
-                ],
-            ],
-            'location'              => [
-                [
+        if ($this->withACF()) {
+            acf_add_local_field_group([
+                'key'                   => 'group_5b217fc6e5c3a',
+                'title'                 => 'Social Networking and Analytics',
+                'fields'                => [
                     [
-                        'param'    => 'options_page',
-                        'operator' => '==',
-                        'value'    => $this->sharingMenuSlug,
+                        'key'               => 'field_5b21814b34e06',
+                        'label'             => 'General Fields',
+                        'name'              => 'general',
+                        'type'              => 'group',
+                        'instructions'      => 'These fields are used on both Twitter and Facebook.',
+                        'required'          => 1,
+                        'conditional_logic' => 0,
+                        'wrapper'           => [
+                            'width' => '',
+                            'class' => '',
+                            'id'    => '',
+                        ],
+                        'layout'            => 'block',
+                        'sub_fields'        => [
+                            [
+                                'key'               => 'field_5b217fef91019',
+                                'label'             => 'Title',
+                                'name'              => 'title',
+                                'type'              => 'text',
+                                'instructions'      => 'Enter the title of this site.',
+                                'required'          => 0,
+                                'conditional_logic' => 0,
+                                'wrapper'           => [
+                                    'width' => '',
+                                    'class' => '',
+                                    'id'    => '',
+                                ],
+                                'default_value'     => '',
+                                'placeholder'       => '',
+                                'prepend'           => '',
+                                'append'            => '',
+                                'maxlength'         => '',
+                            ],
+                            [
+                                'key'               => 'field_5b21819634e07',
+                                'label'             => 'Description',
+                                'name'              => 'description',
+                                'type'              => 'textarea',
+                                'instructions'      => 'Enter one or two sentences about this site.',
+                                'required'          => 0,
+                                'conditional_logic' => 0,
+                                'wrapper'           => [
+                                    'width' => '',
+                                    'class' => '',
+                                    'id'    => '',
+                                ],
+                                'default_value'     => '',
+                                'placeholder'       => '',
+                                'maxlength'         => '',
+                                'rows'              => 3,
+                                'new_lines'         => '',
+                            ],
+                        ],
+                    ],
+                    [
+                        'key'               => 'field_5b217fcf91018',
+                        'label'             => 'Facebook Sharing',
+                        'name'              => 'facebook',
+                        'type'              => 'group',
+                        'instructions'      => 'These fields determine how things look when your site is shared on Facebook.',
+                        'required'          => 1,
+                        'conditional_logic' => 0,
+                        'wrapper'           => [
+                            'width' => '',
+                            'class' => '',
+                            'id'    => '',
+                        ],
+                        'layout'            => 'block',
+                        'sub_fields'        => [
+                            [
+                                'key'               => 'field_5b2180419101b',
+                                'label'             => 'Image',
+                                'name'              => 'image',
+                                'type'              => 'image',
+                                'instructions'      => 'Images must be exactly 1200 pixels wide and 630 pixels high.',
+                                'required'          => 0,
+                                'conditional_logic' => 0,
+                                'wrapper'           => [
+                                    'width' => '',
+                                    'class' => '',
+                                    'id'    => '',
+                                ],
+                                'return_format'     => 'id',
+                                'preview_size'      => 'thumbnail',
+                                'library'           => 'all',
+                                'min_width'         => 1200,
+                                'min_height'        => 630,
+                                'min_size'          => '',
+                                'max_width'         => 1200,
+                                'max_height'        => 630,
+                                'max_size'          => '',
+                                'mime_types'        => '',
+                            ],
+                        ],
+                    ],
+                    [
+                        'key'               => 'field_5b2180d034e03',
+                        'label'             => 'Twitter Sharing',
+                        'name'              => 'twitter',
+                        'type'              => 'group',
+                        'instructions'      => 'These fields determine how things look when your site is shared on Twitter.',
+                        'required'          => 1,
+                        'conditional_logic' => 0,
+                        'wrapper'           => [
+                            'width' => '',
+                            'class' => '',
+                            'id'    => '',
+                        ],
+                        'layout'            => 'block',
+                        'sub_fields'        => [
+                            [
+                                'key'               => 'field_5b2180f434e04',
+                                'label'             => 'Twitter Handle',
+                                'name'              => 'handle',
+                                'type'              => 'text',
+                                'instructions'      => 'Enter the handle for the Twitter account associated with this site.',
+                                'required'          => 0,
+                                'conditional_logic' => 0,
+                                'wrapper'           => [
+                                    'width' => '',
+                                    'class' => '',
+                                    'id'    => '',
+                                ],
+                                'default_value'     => '',
+                                'placeholder'       => '',
+                                'prepend'           => '@',
+                                'append'            => '',
+                                'maxlength'         => '',
+                            ],
+                            [
+                                'key'               => 'field_5b2181d134e08',
+                                'label'             => 'Image',
+                                'name'              => 'image',
+                                'type'              => 'image',
+                                'instructions'      => 'Images must be exactly 1200 pixels wide and 675 pixels high.',
+                                'required'          => 0,
+                                'conditional_logic' => 0,
+                                'wrapper'           => [
+                                    'width' => '',
+                                    'class' => '',
+                                    'id'    => '',
+                                ],
+                                'return_format'     => 'id',
+                                'preview_size'      => 'thumbnail',
+                                'library'           => 'all',
+                                'min_width'         => 1200,
+                                'min_height'        => 675,
+                                'min_size'          => '',
+                                'max_width'         => 1200,
+                                'max_height'        => 675,
+                                'max_size'          => '',
+                                'mime_types'        => '',
+                            ],
+                        ],
+                    ],
+                    [
+                        'key'               => 'field_5b2180129101a',
+                        'label'             => 'Google Analytics Code',
+                        'name'              => 'analytics_id',
+                        'type'              => 'text',
+                        'instructions'      => 'Enter the "UA" code provided by Google for this site.',
+                        'required'          => 0,
+                        'conditional_logic' => 0,
+                        'wrapper'           => [
+                            'width' => '',
+                            'class' => '',
+                            'id'    => '',
+                        ],
+                        'default_value'     => '',
+                        'placeholder'       => '',
+                        'prepend'           => 'UA-',
+                        'append'            => '',
+                        'maxlength'         => '',
                     ],
                 ],
-            ],
-            'menu_order'            => 0,
-            'position'              => 'normal',
-            'style'                 => 'default',
-            'label_placement'       => 'top',
-            'instruction_placement' => 'label',
-            'hide_on_screen'        => '',
-            'active'                => 1,
-            'description'           => '',
-        ]);
+                'location'              => [
+                    [
+                        [
+                            'param'    => 'options_page',
+                            'operator' => '==',
+                            'value'    => $this->sharingMenuSlug,
+                        ],
+                    ],
+                ],
+                'menu_order'            => 0,
+                'position'              => 'normal',
+                'style'                 => 'default',
+                'label_placement'       => 'top',
+                'instruction_placement' => 'label',
+                'hide_on_screen'        => '',
+                'active'                => 1,
+                'description'           => '',
+            ]);
+        }
     }
     
     /**
@@ -319,24 +321,26 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function notifyOnMissingSettings (): void
     {
-        $allData = array_merge(
-            $this->getSharingSettings(),
-            $this->getAnalyticsSettings()
-        );
-        
-        if ($this->isDataMissing($allData)) {
-            /** @noinspection HtmlUnknownTarget */
+        if ($this->withACF()) {
+            $allData = array_merge(
+                $this->getSharingSettings(),
+                $this->getAnalyticsSettings()
+            );
             
-            $link = sprintf('<a href="%s">%s</a>',
-                admin_url('admin.php?page=' . $this->sharingMenuSlug),
-                $this->sharingMenuName); ?>
+            if ($this->isDataMissing($allData)) {
+                /** @noinspection HtmlUnknownTarget */
+                
+                $link = sprintf('<a href="%s">%s</a>',
+                    admin_url('admin.php?page=' . $this->sharingMenuSlug),
+                    $this->sharingMenuName); ?>
 
-          <div class='notice notice-error'>
-            <p>Please fully complete the <?= $link ?> information
-              before launching this site.</p>
-          </div>
-        
-        <?php }
+              <div class='notice notice-error'>
+                <p>Please fully complete the <?= $link ?> information
+                  before launching this site.</p>
+              </div>
+            
+            <?php }
+        }
     }
     
     /**
@@ -350,7 +354,7 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function getSharingSettings (): array
     {
-        if (function_exists('get_field')) {
+        if ($this->withACF()) {
             $generalTitle = get_field('general_title', 'option');
             $generalDescription = get_field('general_description', 'option');
             $twitterHandle = $this->getTwitterHandle();
@@ -385,13 +389,15 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function getTwitterHandle (): string
     {
-        $twitterHandle = get_field('twitter_handle', 'option');
-        
-        if (substr($twitterHandle, 0, 1) !== '@') {
-            $twitterHandle = '@' . $twitterHandle;
+        if ($this->withACF()) {
+            $twitterHandle = get_field('twitter_handle', 'option');
+            
+            if (substr($twitterHandle, 0, 1) !== '@') {
+                $twitterHandle = '@' . $twitterHandle;
+            }
         }
         
-        return $twitterHandle;
+        return $twitterHandle ?? '';
     }
     
     /**
@@ -406,8 +412,12 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function getImageSrc (string $network): string
     {
-        $imageId = get_field($network . '_image', 'option');
-        return wp_get_attachment_image_src($imageId, 'full')[0];
+        if ($this->withACF()){
+          $imageId = get_field($network . '_image', 'option');
+          $imageSrc = wp_get_attachment_image_src($imageId, 'full')[0];
+        }
+        
+        return $imageSrc ?? '';
     }
     
     /**
@@ -419,7 +429,7 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function getAnalyticsSettings (): array
     {
-        if (function_exists('get_field')) {
+        if ($this->withACF()) {
             $uaId = strtoupper(get_field('analytics_id', 'option'));
             
             if (substr($uaId, 0, 3) !== 'UA-') {
