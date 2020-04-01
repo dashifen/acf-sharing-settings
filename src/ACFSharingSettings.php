@@ -2,6 +2,7 @@
 
 namespace Dashifen\ACFSharingSettings;
 
+use Timber\Timber;
 use Dashifen\WPHandler\Handlers\HandlerException;
 use Dashifen\WPHandler\Hooks\Factory\HookFactoryInterface;
 use Dashifen\WPHandler\Handlers\Plugins\AbstractPluginHandler;
@@ -43,7 +44,8 @@ class ACFSharingSettings extends AbstractPluginHandler
             $this->addAction('acf/init', 'addSharingSettingsFields', 15);
             $this->addAction('acf/load_value/key=field_5b217fef91019', 'setDefaultSharingTitle');
             $this->addAction('admin_notices', 'notifyOnMissingSettings');
-            $this->addAction('wp_head', 'emitSettings');
+            $this->addAction('wp_head', 'emitSharingSettings');
+            $this->addAction('wp_footer', 'emitAnalyticsSettings');
         }
     }
     
@@ -256,7 +258,7 @@ class ACFSharingSettings extends AbstractPluginHandler
                         'name'              => 'analytics_id',
                         'type'              => 'text',
                         'instructions'      => 'Enter the "UA" code provided by Google for this site.',
-                        'required'          => 0,
+                        'required'          => 1,
                         'conditional_logic' => 0,
                         'wrapper'           => [
                             'width' => '',
@@ -412,9 +414,9 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function getImageSrc (string $network): string
     {
-        if ($this->withACF()){
-          $imageId = get_field($network . '_image', 'option');
-          $imageSrc = wp_get_attachment_image_src($imageId, 'full')[0];
+        if ($this->withACF()) {
+            $imageId = get_field($network . '_image', 'option');
+            $imageSrc = wp_get_attachment_image_src($imageId, 'full')[0];
         }
         
         return $imageSrc ?? '';
@@ -436,7 +438,11 @@ class ACFSharingSettings extends AbstractPluginHandler
                 $uaId = 'UA-' . $uaId;
             }
             
-            return ['id' => $uaId];
+            return [
+                'google' => [
+                    'analytics' => $uaId
+                ]
+            ];
         }
         
         return [];
@@ -496,5 +502,49 @@ class ACFSharingSettings extends AbstractPluginHandler
             });
         
         return $flatArray;
+    }
+    
+    /**
+     * emitSettings
+     *
+     * Emits the sharing settings information collected by this plugin in the
+     * <head> of the site.
+     *
+     * @return void
+     */
+    protected function emitSharingSettings (): void
+    {
+        $this->renderTwig($this->getSharingSettings(), 'sharing.twig');
+    }
+    
+    /**
+     * renderTwig
+     *
+     * If the $context is not empty (using the above method to determine
+     * emptiness) then we render the twig.
+     *
+     * @param array  $context
+     * @param string $twig
+     *
+     * @return void
+     */
+    private function renderTwig (array $context, string $twig): void
+    {
+        if (!$this->isDataMissing($context)) {
+            $twigFile = realpath(__DIR__ . '/../assets/' . $twig);
+            Timber::render($twigFile, $context);
+        }
+    }
+    
+    /**
+     * emitAnalyticsSettings
+     *
+     * Emits the analytics settings information collected by this plugin just
+     * before the closing </body> tag of the site.
+     *
+     */
+    protected function emitAnalyticsSettings (): void
+    {
+        $this->renderTwig($this->getAnalyticsSettings(), 'analytics.twig');
     }
 }
