@@ -44,6 +44,7 @@ class ACFSharingSettings extends AbstractPluginHandler
             $this->addAction('acf/init', 'addSharingSettingsFields', 15);
             $this->addAction('acf/load_value/key=field_5b217fef91019', 'setDefaultSharingTitle');
             $this->addAction('admin_notices', 'notifyOnMissingSettings');
+            $this->addAction('after_setup_theme', 'addImageSizes');
             $this->addAction('wp_head', 'emitSharingSettings');
             $this->addAction('wp_footer', 'emitAnalyticsSettings');
         }
@@ -357,8 +358,8 @@ class ACFSharingSettings extends AbstractPluginHandler
     protected function getSharingSettings (): array
     {
         if ($this->withACF()) {
-            $generalTitle = get_field('general_title', 'option');
-            $generalDescription = get_field('general_description', 'option');
+            $generalTitle = $this->getTitle();
+            $generalDescription = $this->getDescription();
             $twitterHandle = $this->getTwitterHandle();
             
             return [
@@ -379,6 +380,50 @@ class ACFSharingSettings extends AbstractPluginHandler
         }
         
         return [];
+    }
+    
+    /**
+     * getTitle
+     *
+     * Returns the sharing title, using the default title specified in the
+     * settings for the home and front page and the post's title otherwise.
+     *
+     * @return string
+     */
+    protected function getTitle (): string
+    {
+        return is_home() || is_front_page() || empty($title = get_the_title())
+            ? get_field('general_title', 'option')
+            : $title;
+    }
+    
+    protected function getDescription (): string
+    {
+        if (is_home() || is_front_page()) {
+            return get_field('general_description', 'option');
+        }
+        
+        // if we didn't return above, then we want to use the content of our
+        // post to extract the first two sentences and use those as our
+        // description.  to do that we split based on a regular expression that
+        // looks for punctuation followed by spaces and a capital letter.  this
+        // helps to avoid abbreviations.
+        
+        $post = get_post();
+        $content = apply_filters('the_content', $post->post_content);
+        $sentences = preg_split('/\. +[A-Z]/', $content);
+        
+        if (sizeof($sentences) === 0) {
+            return get_field('general_description', 'option');
+        }
+        
+        // because the size of our array is not zero, we know there must be at
+        // least one sentence in it.  so we'll use that one and then add the
+        // second sentence to it.  but, in case there was only one sentence
+        // available, we'll use the null coalescing operator to avoid a PHP
+        // warning.
+        
+        return $sentences[0] . ' ' . ($sentences[1] ?? '');
     }
     
     /**
@@ -414,9 +459,14 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function getImageSrc (string $network): string
     {
-        if ($this->withACF()) {
+        // we want to use the featured image for this post, if it's available,
+        // and fall back on the default image when we need to.
+        
+        if (has_post_thumbnail()) {
+            $imageSrc = wp_get_attachment_image_src(get_post_thumbnail_id(), $network . '-card')[0];
+        } else {
             $imageId = get_field($network . '_image', 'option');
-            $imageSrc = wp_get_attachment_image_src($imageId, 'full')[0];
+            $imageSrc = wp_get_attachment_image_src($imageId, $network . '-card')[0];
         }
         
         return $imageSrc ?? '';
@@ -502,6 +552,20 @@ class ACFSharingSettings extends AbstractPluginHandler
             });
         
         return $flatArray;
+    }
+    
+    /**
+     * addImageSizes
+     *
+     * Adds image sizes for Facebook and Twitter so that we can use featured
+     * images as a part of the social media cards.
+     *
+     * @return void
+     */
+    protected function addImageSizes (): void
+    {
+        add_image_size('twitter-card', 1200, 675);
+        add_image_size('facebook-card', 1200, 630);
     }
     
     /**
