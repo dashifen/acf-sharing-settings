@@ -307,7 +307,7 @@ class ACFSharingSettings extends AbstractPluginHandler
      */
     protected function setDefaultSharingTitle (string $value): string
     {
-        if (!empty($value)) {
+        if (empty($value)) {
             $value = get_bloginfo('name');
         }
         
@@ -388,18 +388,26 @@ class ACFSharingSettings extends AbstractPluginHandler
      * Returns the sharing title, using the default title specified in the
      * settings for the home and front page and the post's title otherwise.
      *
-     * @return string
+     * @return string|null
      */
-    protected function getTitle (): string
+    protected function getTitle (): ?string
     {
-        return is_home() || is_front_page() || empty($title = get_the_title())
+        return is_admin() || is_home() || is_front_page() || empty($title = get_the_title())
             ? get_field('general_title', 'option')
             : $title;
     }
     
-    protected function getDescription (): string
+    /**
+     * getDescription
+     *
+     * Returns the sharing description or the first two sentences of a post's
+     * content if that makes more sense.
+     *
+     * @return string|null
+     */
+    protected function getDescription (): ?string
     {
-        if (is_home() || is_front_page()) {
+        if (is_admin() || is_home() || is_front_page()) {
             return get_field('general_description', 'option');
         }
         
@@ -503,13 +511,12 @@ class ACFSharingSettings extends AbstractPluginHandler
      *
      * Given an array, returns true if everything in it is empty.
      *
-     * @param array $array
+     * @param array|null $array
      *
      * @return bool
      */
-    protected function isDataMissing (array $array): bool
+    protected function isDataMissing (?array $array = null): bool
     {
-        
         // ACF should make sure that our data is complete -- i.e. it's all
         // required in the field group.  but, we're going to check for it all
         // here just in case.  to do that, we're going to flatten the array
