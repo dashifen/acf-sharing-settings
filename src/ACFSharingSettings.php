@@ -419,19 +419,30 @@ class ACFSharingSettings extends AbstractPluginHandler
         
         $post = get_post();
         $content = apply_filters('the_content', $post->post_content);
-        $sentences = preg_split('/\. +[A-Z]/', $content);
-        
+        $sentences = preg_split('/([.!?] +[A-Z])/', $content, -1, PREG_SPLIT_DELIM_CAPTURE);
+    
         if (sizeof($sentences) === 0) {
             return get_field('general_description', 'option');
         }
         
-        // because the size of our array is not zero, we know there must be at
-        // least one sentence in it.  so we'll use that one and then add the
-        // second sentence to it.  but, in case there was only one sentence
-        // available, we'll use the null coalescing operator to avoid a PHP
-        // warning.
+        // if we're here, then we have at least one sentence in our array.
+        // that sentence is followed by the captured delimiter which includes
+        // the ending mark of punctuation and the next word's opening capital
+        // letter.  we'll start joining all of that together here making sure
+        // that we stop after the second sentence.
+    
+        $description = '';
+        for($i=0; $i < sizeof($sentences) && $i < 4; $i+=2) {
+            $description .= $sentences[$i] . $sentences[$i+1];
+        }
+    
+        $description = strip_tags($description);
         
-        return strip_Tags($sentences[0] . ' ' . ($sentences[1] ?? ''));
+        // remember:  the captured delimiter includes the opening capital
+        // letter of the word that follows our sentence.  therefore, we remove
+        // it here and then trim to get rid of trailing space, too.
+        
+        return trim(substr($description, 0, strlen($description)-1));
     }
     
     /**
