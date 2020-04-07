@@ -431,7 +431,7 @@ class ACFSharingSettings extends AbstractPluginHandler
         // available, we'll use the null coalescing operator to avoid a PHP
         // warning.
         
-        return $sentences[0] . ' ' . ($sentences[1] ?? '');
+        return strip_Tags($sentences[0] . ' ' . ($sentences[1] ?? ''));
     }
     
     /**
