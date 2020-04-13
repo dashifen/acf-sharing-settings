@@ -433,11 +433,11 @@ class ACFSharingSettings extends AbstractPluginHandler
     
         $description = '';
         for($i=0; $i < sizeof($sentences) && $i < 4; $i+=2) {
-            $description .= $sentences[$i] . $sentences[$i+1];
+            $description .= $sentences[$i] . ($sentences[$i+1] ?? '');
         }
     
         $description = strip_tags($description);
-        
+      
         // remember:  the captured delimiter includes the opening capital
         // letter of the word that follows our sentence.  therefore, we remove
         // it here and then trim to get rid of trailing space, too.

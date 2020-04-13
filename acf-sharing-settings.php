@@ -5,7 +5,7 @@
  * Description: An ACF field group for a settings page relating to how a site appears on Twitter and Facebook.
  * Author URI: mailto:dashifen@dashifen.com
  * Author: David Dashifen Kees
- * Version: 1.5.3
+ * Version: 1.5.4
  *
  * @noinspection PhpStatementHasEmptyBodyInspection
  * @noinspection PhpIncludeInspection
