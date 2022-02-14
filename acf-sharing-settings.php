@@ -4,7 +4,7 @@
  * Description: An ACF field group for a settings page relating to how a site appears on Twitter and Facebook.
  * Author URI: mailto:dashifen@dashifen.com
  * Author: David Dashifen Kees
- * Version: 2.0.0
+ * Version: 2.1.0
  */
 
 use Dashifen\WPHandler\Handlers\HandlerException;
@@ -14,11 +14,11 @@ if (!class_exists('Dashifen\ACFSharingSettings\ACFSharingSettings')) {
   require_once 'vendor/autoload.php';
 }
 
-(function() {
-    try {
-        $acfSharingSettings = new ACFSharingSettings();
-        $acfSharingSettings->initialize();
-    } catch (HandlerException $e) {
-        wp_die($e->getMessage());
-    }
+(function () {
+  try {
+    $acfSharingSettings = new ACFSharingSettings();
+    $acfSharingSettings->initialize();
+  } catch (HandlerException $e) {
+    wp_die($e->getMessage());
+  }
 })();

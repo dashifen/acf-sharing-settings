@@ -16,15 +16,14 @@
       "type": "package",
       "package": {
         "name": "advanced-custom-fields/advanced-custom-fields-pro",
-        "version": "5.10.2",
-        "type": "wordpress-plugin",
+        "version": "5.11.4",
         "dist": {
           "type": "zip",
           "url": "https://connect.advancedcustomfields.com/index.php?a=download&p=pro&k={%ACF_PRO_KEY}&t={%version}"
         },
         "require": {
-          "composer/installers": "^2.0",
-          "ffraenz/private-composer-installer": "^2.0"
+          "composer/installers": "^1.4",
+          "ffraenz/private-composer-installer": "^5.0"
         }
       }
     }
@@ -36,9 +35,14 @@
   },
   "config": {
     "sort-packages": true,
-    "optimize-autoloader": true
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "composer/installers": true,
+      "ffraenz/private-composer-installer": true
+    }
   },
   "require": {
+    "advanced-custom-fields/advanced-custom-fields-pro": "*",
     "dashifen/wp-handler": "^10",
     "timber/timber": "^1.15"
   }
